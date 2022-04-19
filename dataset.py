@@ -11,10 +11,10 @@ splits = ['test', 'train', 'validation']
 label_types = ["detections"]
 classes = {"Ceiling fan", "Lamp", "Light bulb", "Light switch", "Mechanical fan", "Power plugs and sockets", "Television"}
 paths = {
-    'input_src': '~/fiftyone/open-images-v6',
-    'input_data': '~/fiftyone/open-images-v6/{}/data',
-    'input_metadata': '~/fiftyone/open-images-v6/{}/metadata/classes.csv',
-    'input_labels': '~/fiftyone/open-images-v6/{}/labels/detections.csv',
+    'input_src': os.path.expanduser('~/') + 'fiftyone/open-images-v6',
+    'input_data': os.path.expanduser('~/') + 'fiftyone/open-images-v6/{}/data',
+    'input_metadata': os.path.expanduser('~/') + 'fiftyone/open-images-v6/{}/metadata/classes.csv',
+    'input_labels': os.path.expanduser('~/') + 'fiftyone/open-images-v6/{}/labels/detections.csv',
     'output_data': './data',
     'output_labels': './detections.csv',
 }
@@ -91,6 +91,7 @@ def main():
     # Splits
     if args.download: download_data()
     for split in splits:
+        print(f'Split: {split}')
         copy_images(split)
         clean_csv(split, generate_label_map(split))
 
