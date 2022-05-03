@@ -4,7 +4,7 @@ import RPi.GPIO as GPIO
 import statistics
 import time
 
-class EyeEnum(enum.Enum):
+class PositionEnum(enum.Enum):
     LEFT = 0
     CENTER = 1
     RIGHT = 2
@@ -42,17 +42,17 @@ class EyeTrackingModule:
 
         # Core Logic
         if leftVal < self._sensorThreshold and rightVal > self._sensorThreshold:
-            return EyeEnum.LEFT
+            return PositionEnum.LEFT
         elif leftVal > self._sensorThreshold and rightVal < self._sensorThreshold:
-            return EyeEnum.RIGHT
+            return PositionEnum.RIGHT
         elif leftVal > self._sensorThreshold and rightVal > self._sensorThreshold:
-            return EyeEnum.CENTER
+            return PositionEnum.CENTER
         elif leftVal < self._sensorThreshold and rightVal < self._sensorThreshold:
-            return EyeEnum.CLOSED
+            return PositionEnum.CLOSED
 
     def eyePositionMode(self, duration):
-        startTime = time.time()
         samples = []
+        startTime = time.time()
         while time.time() - startTime < duration:
             leftVal = self._readInfra(self._pinL)
             rightVal = self._readInfra(self._pinR)
@@ -61,12 +61,12 @@ class EyeTrackingModule:
             # print(f'LOG: Left {leftVal}')
             # print(f'LOG: Right {rightVal}')
             if leftVal < self._sensorThreshold and rightVal > self._sensorThreshold:
-                samples.append(EyeEnum.LEFT)
+                samples.append(PositionEnum.LEFT)
             elif leftVal > self._sensorThreshold and rightVal < self._sensorThreshold:
-                samples.append(EyeEnum.RIGHT)
+                samples.append(PositionEnum.RIGHT)
             elif leftVal > self._sensorThreshold and rightVal > self._sensorThreshold:
-                samples.append(EyeEnum.CENTER)
+                samples.append(PositionEnum.CENTER)
             elif leftVal < self._sensorThreshold and rightVal < self._sensorThreshold:
-                samples.append(EyeEnum.CLOSED)
+                samples.append(PositionEnum.CLOSED)
         
         return statistics.mode(samples)
