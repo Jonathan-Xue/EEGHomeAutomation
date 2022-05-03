@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Main script to run the object detection routine."""
-import argparse
-import sys
-import time
 
-import cv2
 from object_detector import ObjectDetector
 from object_detector import ObjectDetectorOptions
+
+import argparse
+import cv2
+import sys
+import time
+import queue
 import utils
 
 
@@ -27,7 +29,7 @@ class ObjectDetectionModule:
         pass
 
 
-    def objectDetection(model: str, camera_id: int, width: int, height: int, num_threads: int, enable_edgetpu: bool, duration: float, objectOutput) -> None:
+    def objectDetection(self, model: str, camera_id: int, width: int, height: int, num_threads: int, enable_edgetpu: bool, duration: float) -> None:
         """Continuously run inference on images acquired from the camera.
         Args:
         model: Name of the TFLite object detection model.
@@ -75,10 +77,10 @@ class ObjectDetectionModule:
                 else:
                     objects['right'].append(new_obj)
             if objects != {'left': [], 'center': [], 'right': []}:
-                objectOutput = objects
                 cap.release()
                 cv2.destroyAllWindows()
-                return
+                return objects
 
         cap.release()
         cv2.destroyAllWindows()
+        return {'left': [], 'center': [], 'right': []}

@@ -5,6 +5,7 @@ import time
 import numpy as np
 import joblib
 import os
+import queue
 
 class CommandEnum(enum.Enum):
     TURN_OFF = 0
@@ -63,22 +64,11 @@ class EEGModule:
 
             # Output
             if yPred[0] == "turn_on":
-                eegOutput = CommandEnum.TURN_ON
-                return
+                return CommandEnum.TURN_ON
             else:
-                eegOutput = CommandEnum.TURN_OFF
-                return
+                return CommandEnum.TURN_OFF
 
         except Exception as e:
             print(e)
         except KeyboardInterrupt:
             print('Closing')
-
-# if __name__ == "__main__":
-#     command_recognition = CommandRecognition()
-#     streams = command_recognition.setupStream()
-#     model = command_recognition.loadModel(os.path.abspath("./models/model_RF.pkl"))
-
-#     while True:
-#         res = command_recognition.modelPrediction(model, streams)
-#         print(res)

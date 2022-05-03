@@ -4,7 +4,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app, support_credentials=True)
 
-db = ['test: test']
+db = []
 
 @app.route('/')
 def home():

@@ -1,4 +1,5 @@
 import enum
+import queue
 import RPi.GPIO as GPIO
 import statistics
 import time
@@ -49,7 +50,7 @@ class EyeTrackingModule:
         elif leftVal < self._sensorThreshold and rightVal < self._sensorThreshold:
             return EyeEnum.CLOSED
 
-    def eyePositionMode(self, duration, eyeOutput):
+    def eyePositionMode(self, duration):
         startTime = time.time()
         samples = []
         while time.time() - startTime < duration:
@@ -71,5 +72,4 @@ class EyeTrackingModule:
                 print("LOG: Closed")
                 samples.append(EyeEnum.CLOSED)
         
-        eyeOutput = statistics.mode(samples)
-        return
+        return statistics.mode(samples)

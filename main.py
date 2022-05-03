@@ -1,3 +1,4 @@
+import concurrent.futures
 import os
 import requests
 import threading
@@ -32,38 +33,29 @@ def main():
             if startTime == float('inf'):
                 startTime = time.time()
             elif time.time() - startTime > eyeModuleTriggerThreshold:
-                # Threads
-                eyeOutput, objectOutput, eegOutput = (None, None, None)
+                # Thread Pool
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    eyeModuleThread = executor.submit(eyeModule.eyePositionMode, DURATION)
+                    objectModuleThread = executor.submit(objectModule.objectDetection, './models/efficientdet_lite0.tflite', 0, 640, 480, 4, False, DURATION)
+                    eegModuleThread = executor.submit(eegModule.modelPrediction, eegModel, eegStreams, DURATION)
 
-                eyeModuleThread = threading.Thread(target=eyeModule.eyePositionMode, args=(DURATION, eyeOutput,))
-                objectModuleThread = threading.Thread(target=objectModule.objectDetection, args=('./models/efficientdet_lite0.tflite', 0, 640, 480, 4, False, objectOutput,))
-                eegModuleThread = threading.Thread(target=eegModule.modelPrediction, args=(eegModel, eegStreams, DURATION, eegOutput))
 
-                eyeModuleThread.start()
-                objectModuleThread.start()
-                eegModuleThread.start()
+                    position = eyeModuleThread.result()
+                    objects = objectModuleThread.result()
+                    command = eegModuleThread.result()
 
-                eyeModuleThread.join()
-                objectModuleThread.join()
-                eegModuleThread.join()
+                    # Device
+                    device = None
+                    if position == EyeEnum.LEFT:
+                        device = objects['left'][0]['label'] if len(objects['left']) > 0 else None
+                    elif position == EyeEnum.CENTER:
+                        device = objects['center'][0]['label'] if len(objects['center']) > 0 else None
+                    elif position == EyeEnum.RIGHT:
+                        device = objects['right'][0]['label'] if len(objects['right']) > 0 else None
 
-                position = eyeOutput
-                objects = objectOutput
-                command = eegOutput
-
-                # Device
-                device = None
-                if position == EyeEnum.LEFT:
-                    device = objects['left'][0]['label'] if len(objects['left']) > 0 else None
-                elif position == EyeEnum.CENTER:
-                    device = objects['center'][0]['label'] if len(objects['center']) > 0 else None
-                elif position == EyeEnum.RIGHT:
-                    device = objects['right'][0]['label'] if len(objects['right']) > 0 else None
-
-                # Send Request
-                if device != None:
+                    # Send Request
                     requests.post('http://127.0.0.1:5000/rpi', json={'device': device,'command': command})
-                startTime = float('inf')
+                    startTime = float('inf')
 
 if __name__ == '__main__':
     main()
