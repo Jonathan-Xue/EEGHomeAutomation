@@ -3,6 +3,5 @@
 object_detection/data
 *.csv
 *.jpg
-*.tflite
 *.txt
 *.zip
