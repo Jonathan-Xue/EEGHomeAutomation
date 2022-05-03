@@ -58,8 +58,8 @@ class EyeTrackingModule:
             rightVal = self._readInfra(self._pinR)
             
             # Core Logic
-            print(f'LOG: Left {leftVal}')
-            print(f'LOG: Right {rightVal}')
+            # print(f'LOG: Left {leftVal}')
+            # print(f'LOG: Right {rightVal}')
             if leftVal < self._sensorThreshold and rightVal > self._sensorThreshold:
                 samples.append(EyeEnum.LEFT)
             elif leftVal > self._sensorThreshold and rightVal < self._sensorThreshold:
