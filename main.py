@@ -13,17 +13,12 @@ DURATION = 10
 
 # Main
 def main():
-    # Eye Tracking
     eyeModuleTriggerThreshold = 3.0
+
+    # Modules
     eyeModule = EyeTrackingModule(pinL = 5, pinR = 6, sensorThreshold = 300)
-
-    # Object Detection
     objectModule = ObjectDetectionModule()
-
-    # EEG
-    eegModule = EEGModule()
-    eegStreams = eegModule.setupStream()
-    eegModel = eegModule.loadModel(os.path.abspath("./models/model_RF.pkl"))
+    eegModule = EEGModule(modelPath='./models/model_RF.pkl')
 
     # Loop
     startTime = float('inf')
@@ -37,7 +32,7 @@ def main():
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     eyeModuleThread = executor.submit(eyeModule.eyePositionMode, DURATION)
                     objectModuleThread = executor.submit(objectModule.objectDetection, './models/efficientdet_lite0.tflite', 0, 640, 480, 4, False, DURATION)
-                    eegModuleThread = executor.submit(eegModule.modelPrediction, eegModel, eegStreams, DURATION)
+                    eegModuleThread = executor.submit(eegModule.modelPrediction, DURATION)
 
                     position = eyeModuleThread.result()
                     objects = objectModuleThread.result()
