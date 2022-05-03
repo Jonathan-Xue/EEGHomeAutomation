@@ -66,9 +66,9 @@ class ObjectDetectionModule:
                     if position == PositionEnum.RIGHT: potentialSamples.append(newObj)
             
             # Highest Confidence Sample
-            highConfidenceSample = max(potentialSamples, key=lambda x:x['score'])
-            samples.append(highConfidenceSample['label'])
+            if len(potentialSamples):
+                highConfidenceSample = max(potentialSamples, key=lambda x:x['score'])
+                samples.append(highConfidenceSample['label'])
 
         cap.release()
-        samples = [elem for elem in samples if elem != None]
         return statistics.mode(samples) if len(samples) else None

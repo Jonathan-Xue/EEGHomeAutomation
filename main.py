@@ -35,6 +35,7 @@ def main():
 
                     object = objectModuleThread.result()
                     command = eegModuleThread.result()
+                    print(f'{command.name} {object}')
 
                     # Send Request
                     # requests.post('http://127.0.0.1:5000/rpi', json={'object': object, 'command': command.name})
