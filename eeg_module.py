@@ -18,7 +18,7 @@ class EEGModule:
         self.windowLength = windowLength
         self.shiftLength = shiftLength
 
-    def setupStream(self) -> list:
+    def setupStream(self):
         try:
             print('Looking for an EEG stream')
             streams = resolve_byprop('type', 'EEG', timeout=10)
@@ -33,7 +33,7 @@ class EEGModule:
         model = joblib.load(modelPath)
         return model
 
-    def modelPrediction(self, model, streams, n, eegOutput) -> bool:
+    def modelPrediction(self, model, streams, n):
         try:
             print("Start acquiring data from EEG stream")
             inlet = StreamInlet(streams[0], max_chunklen=50)

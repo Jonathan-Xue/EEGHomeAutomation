@@ -39,7 +39,6 @@ def main():
                     objectModuleThread = executor.submit(objectModule.objectDetection, './models/efficientdet_lite0.tflite', 0, 640, 480, 4, False, DURATION)
                     eegModuleThread = executor.submit(eegModule.modelPrediction, eegModel, eegStreams, DURATION)
 
-
                     position = eyeModuleThread.result()
                     objects = objectModuleThread.result()
                     command = eegModuleThread.result()
@@ -54,7 +53,7 @@ def main():
                         device = objects['right'][0]['label'] if len(objects['right']) > 0 else None
 
                     # Send Request
-                    requests.post('http://127.0.0.1:5000/rpi', json={'device': device,'command': command})
+                    requests.post('http://127.0.0.1:5000/rpi', json={'device': device, 'command': command.name})
                     startTime = float('inf')
 
 if __name__ == '__main__':
