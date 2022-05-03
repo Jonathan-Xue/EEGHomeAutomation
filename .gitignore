@@ -1,7 +1,6 @@
 .DS_Store
 
 object_detection/data
-object_detection/models
 *.csv
 *.jpg
 *.tflite
