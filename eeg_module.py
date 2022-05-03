@@ -31,6 +31,7 @@ class EEGModule:
         # Load Model
         self.model = joblib.load(modelPath)
 
+    # Public Methods
     def modelPrediction(self, duration):
         try:
             print("Start acquiring data from EEG stream")
@@ -62,7 +63,6 @@ class EEGModule:
                 return CommandEnum.TURN_ON
             else:
                 return CommandEnum.TURN_OFF
-
         except Exception as e:
             print(e)
         except KeyboardInterrupt:

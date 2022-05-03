@@ -21,7 +21,7 @@ class ObjectDetectionModule:
         options = ObjectDetectorOptions(num_threads=numThreads, score_threshold=0.5, max_results=3, enable_edgetpu=enableEdgeTPU)
         self._model = ObjectDetector(model_path=modelPath, options=options)
 
-
+    # Public Methods
     def objectDetection(self, duration):
         # Capture Video Input
         cap = cv2.VideoCapture(self._cameraId)
