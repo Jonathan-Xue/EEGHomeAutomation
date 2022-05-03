@@ -36,7 +36,7 @@ class EyeTrackingModule:
         return time.time() - pulse_start
     
     # Public Methods
-    def eyePositionCurr(self):
+    def eyePosition(self):
         leftVal = self._readInfra(self._pinL)
         rightVal = self._readInfra(self._pinR)
 

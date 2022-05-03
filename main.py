@@ -24,13 +24,12 @@ def main():
     startTime = float('inf')
     while True:
         # Eyes Closed
-        if eyeModule.eyePositionCurr() == EyeEnum.CLOSED:
+        if eyeModule.eyePosition() == EyeEnum.CLOSED:
             if startTime == float('inf'):
                 startTime = time.time()
             elif time.time() - startTime > eyeModuleTriggerThreshold:
                 # Thread Pool
                 with concurrent.futures.ThreadPoolExecutor() as executor:
-                    eyeModuleThread = executor.submit(eyeModule.eyePositionMode, DURATION)
                     objectModuleThread = executor.submit(objectModule.objectDetection, './models/efficientdet_lite0.tflite', 0, 640, 480, 4, False, DURATION)
                     eegModuleThread = executor.submit(eegModule.modelPrediction, DURATION)
 
@@ -48,7 +47,7 @@ def main():
                         device = objects['right'][0]['label'] if len(objects['right']) > 0 else None
 
                     # Send Request
-                    requests.post('http://127.0.0.1:5000/rpi', json={'device': device, 'command': command.name})
+                    # requests.post('http://127.0.0.1:5000/rpi', json={'device': device, 'command': command.name})
                     startTime = float('inf')
 
 if __name__ == '__main__':

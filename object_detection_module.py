@@ -25,11 +25,21 @@ import utils
 
 
 class ObjectDetectionModule:
-    def __init__(self):
-        pass
+    def __init__(self, eyeTrackingModule, modelPath, cameraId, width, height, numThreads, enableEdgeTPU):
+        self._eyeTrackingModule = eyeTrackingModule
+        self._modelPath = modelPath,
+        self._cameraId = cameraId
+        self._width = width
+        self._height = height
+        self._numThreads = numThreads
+        self._enableEdgeTPU = enableEdgeTPU
+
+        # Load Model
+        options = ObjectDetectorOptions(num_threads=numThreads, score_threshold=0.5, max_results=3, enable_edgetpu=enableEdgeTPU)
+        self._model = ObjectDetector(model_path=modelPath, options=options)
 
 
-    def objectDetection(self, model: str, camera_id: int, width: int, height: int, num_threads: int, enable_edgetpu: bool, duration: float) -> None:
+    def objectDetection(self, duration):
         """Continuously run inference on images acquired from the camera.
         Args:
         model: Name of the TFLite object detection model.
@@ -40,42 +50,36 @@ class ObjectDetectionModule:
         enable_edgetpu: True/False whether the model is a EdgeTPU model.
         """
 
-        # Start capturing video input from the camera
-        cap = cv2.VideoCapture(camera_id)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-
-        # Initialize the object detection model
-        options = ObjectDetectorOptions(num_threads=num_threads, score_threshold=0.5, max_results=3, enable_edgetpu=enable_edgetpu)
-        detector = ObjectDetector(model_path=model, options=options)
-
-        # Continuously capture images from the camera and run inference
-        start_time = time.time()
-        while cap.isOpened() and time.time() - start_time < duration:
+        # Capture Video Input
+        cap = cv2.VideoCapture(self._cameraId)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self._width)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self._height)
+        
+        # Capture Images & Run Inference
+        startTime = time.time()
+        while cap.isOpened() and time.time() - startTime < duration:
             success, image = cap.read()
             if not success:
-                sys.exit(
-                    'ERROR: Unable to read from webcam. Please verify your webcam settings.'
-                )
+                sys.exit('ERROR: Unable to read from webcam. Please verify your webcam settings.')
 
             image = cv2.rotate(image, cv2.ROTATE_180)
 
-            # Run object detection estimation using the model.
-            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            detections = detector.detect(rgb_image)
+            # Object Detection Estimation
+            rgbImage = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            detections = self._model.detect(rgbImage)
 
-            # Dictionary of detected objects
+            # Dictionary
             objects = {'left': [], 'center': [], 'right': []}
             for d in detections:
                 center = (d[0][2] + d[0][0]) / 2 
-                new_obj = {'left': d[0][0], 'top': d[0][1], 'right': d[0][2],
-                        'bottom': d[0][3], 'label': d[1][0][0], 'score': d[1][0][1]}
-                if center < image.shape[1]/3:
+                new_obj = {'left': d[0][0], 'top': d[0][1], 'right': d[0][2], 'bottom': d[0][3], 'label': d[1][0][0], 'score': d[1][0][1]}
+                if center < image.shape[1] / 3:
                     objects['left'].append(new_obj)
-                elif center < 2*image.shape[1]/3:
+                elif center < 2 * image.shape[1] / 3:
                     objects['center'].append(new_obj)
                 else:
                     objects['right'].append(new_obj)
+
             if objects != {'left': [], 'center': [], 'right': []}:
                 cap.release()
                 cv2.destroyAllWindows()
