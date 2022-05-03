@@ -1,58 +1,74 @@
+import enum
 import RPi.GPIO as GPIO
 import statistics
 import time
 
-def read_infra(pin):
-    GPIO.setup(pin, GPIO.OUT)
-    
-    # Charge Capacitor
-    GPIO.output(pin, GPIO.HIGH)
-    time.sleep(0.01)
+class EyeEnum(enum.Enum):
+    LEFT = 0
+    CENTER = 1
+    RIGHT = 2
+    CLOSED = 3
 
-    pulse_start = time.time()
-    
-    # Discharge Capacitor
-    GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    while GPIO.input(pin) > 0:
-        pass
-    
-    # Duration
-    return time.time() - pulse_start
+class EyeTrackingModule:
+    def __init__(self, pinL, pinR, sensorThreshold):
+        GPIO.setmode(GPIO.BCM)
 
-def eye_tracking(pin_l, pin_r, sensor_threshold, trigger_threshold, num_samples, sample_rate = 1.0):
-    GPIO.setmode(GPIO.BCM)
+        self._pinL = pinL
+        self._pinR = pinR
+        self._sensorThreshold = sensorThreshold
 
-    # Loop
-    trigger_count = 0
-    samples = []
-    while True:
-        left_val = read_infra(pin_l)
-        right_val = read_infra(pin_r)
+    def _readInfra(self, pin):
+        GPIO.setup(pin, GPIO.OUT)
         
+        # Charge Capacitor
+        GPIO.output(pin, GPIO.HIGH)
+        time.sleep(0.01)
+
+        pulse_start = time.time()
+        
+        # Discharge Capacitor
+        GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        while GPIO.input(pin) > 0:
+            pass
+        
+        # Duration
+        return time.time() - pulse_start
+    
+    # Public Methods
+    def eyePositionCurr(self):
+        leftVal = self._readInfra(self._pinL)
+        rightVal = self._readInfra(self._pinR)
+
         # Core Logic
-        print(f'LOG: {left_val}\t{right_val}')
-        if trigger_count >= trigger_threshold:
-            if left_val < sensor_threshold and right_val < sensor_threshold:
-                print("LOG: Neutral")
-                samples.append(0)
-            elif left_val > sensor_threshold and right_val < sensor_threshold:
+        if leftVal < self._sensorThreshold and rightVal > self._sensorThreshold:
+            return EyeEnum.LEFT
+        elif leftVal > self._sensorThreshold and rightVal < self._sensorThreshold:
+            return EyeEnum.RIGHT
+        elif leftVal > self._sensorThreshold and rightVal > self._sensorThreshold:
+            return EyeEnum.CENTER
+        elif leftVal < self._sensorThreshold and rightVal < self._sensorThreshold:
+            return EyeEnum.CLOSED
+
+    def eyePositionMode(self, duration):
+        startTime = time.time()
+        samples = []
+        while time.time() - startTime < duration:
+            leftVal = self._readInfra(self._pinL)
+            rightVal = self._readInfra(self._pinR)
+            
+            # Core Logic
+            print(f'LOG: {leftVal}\t{rightVal}')
+            if leftVal < self._sensorThreshold and rightVal > self._sensorThreshold:
                 print("LOG: Left")
-                samples.append(-1)
-            elif left_val < sensor_threshold and right_val > sensor_threshold:
+                samples.append(EyeEnum.LEFT)
+            elif leftVal > self._sensorThreshold and rightVal < self._sensorThreshold:
                 print("LOG: Right")
-                samples.append(1)
-        else:
-            if left_val > sensor_threshold and right_val > sensor_threshold:
+                samples.append(EyeEnum.RIGHT)
+            elif leftVal > self._sensorThreshold and rightVal > self._sensorThreshold:
+                print("LOG: Center")
+                samples.append(EyeEnum.CENTER)
+            elif leftVal < self._sensorThreshold and rightVal < self._sensorThreshold:
                 print("LOG: Closed")
-                trigger_count += 1
-                samples.clear()
-
-        # Exit Condition
-        if len(samples) >= num_samples:
-            return statistics.mode(samples)
-
-        # Sample Rate 
-        time.sleep(1.0 / sample_rate)
-
-if __name__ == '__main__':
-    main()
+                samples.append(EyeEnum.CLOSED)
+        
+        return statistics.mode(samples)
