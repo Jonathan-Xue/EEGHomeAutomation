@@ -17,6 +17,7 @@ def main():
     eyeModule = EyeTrackingModule(pinL = 5, pinR = 6, sensorThreshold = 300)
 
     # Object Detection
+    objectModule = ObjectDetectionModule()
 
     # EEG
     eegModule = EEGModule()
@@ -31,9 +32,24 @@ def main():
             if startTime == float('inf'):
                 startTime = time.time()
             elif time.time() - startTime > eyeModuleTriggerThreshold:
-                position = threading.Thread(target=EyeTrackingModule.eyePositionMode, args=(DURATION,))
-                objects = threading.Thread(target=ObjectDetectionModule.objectDetection, args=('./models/efficientdet_lite0.tflite', 0, 640, 480, 4, False))
-                command = threading.Thread(target=EEGModule.modelPrediction, args=(eegModel, eegStreams, DURATION,))
+                # Threads
+                eyeOutput, objectOutput, eegOutput = (None, None, None)
+
+                eyeModuleThread = threading.Thread(target=eyeModule.eyePositionMode, args=(DURATION, eyeOutput,))
+                objectModuleThread = threading.Thread(target=objectModule.objectDetection, args=('./models/efficientdet_lite0.tflite', 0, 640, 480, 4, False, objectOutput,))
+                eegModuleThread = threading.Thread(target=eegModule.modelPrediction, args=(eegModel, eegStreams, DURATION, eegOutput))
+
+                eyeModuleThread.start()
+                objectModuleThread.start()
+                eegModuleThread.start()
+
+                eyeModuleThread.join()
+                objectModuleThread.join()
+                eegModuleThread.join()
+
+                position = eyeOutput
+                objects = objectOutput
+                command = eegOutput
 
                 # Device
                 device = None
