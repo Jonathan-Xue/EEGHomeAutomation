@@ -32,13 +32,21 @@ def main():
                 startTime = time.time()
             elif time.time() - startTime > eyeModuleTriggerThreshold:
                 position = threading.Thread(target=EyeTrackingModule.eyePositionMode, args=(DURATION,))
-                objects = threading.Thread(target=ObjectDetectionModule.objectDetection, args=('./open_images_v6/models/efficientdet_lite0.tflite', 0, 640, 480, 4, False))
+                objects = threading.Thread(target=ObjectDetectionModule.objectDetection, args=('./models/efficientdet_lite0.tflite', 0, 640, 480, 4, False))
                 command = threading.Thread(target=EEGModule.modelPrediction, args=(eegModel, eegStreams, DURATION,))
 
+                # Device
                 device = None
+                if position == EyeEnum.LEFT:
+                    device = objects['left'][0]['label'] if len(objects['left']) > 0 else None
+                elif position == EyeEnum.CENTER:
+                    device = objects['center'][0]['label'] if len(objects['center']) > 0 else None
+                elif position == EyeEnum.RIGHT:
+                    device = objects['right'][0]['label'] if len(objects['right']) > 0 else None
 
                 # Send Request
-                requests.post('http://127.0.0.1:5000/rpi', json={'device': device,'command': command})
+                if device != None:
+                    requests.post('http://127.0.0.1:5000/rpi', json={'device': device,'command': command})
                 startTime = float('inf')
 
 if __name__ == '__main__':
