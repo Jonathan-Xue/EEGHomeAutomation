@@ -49,24 +49,3 @@ class EyeTrackingModule:
             return PositionEnum.CENTER
         elif leftVal < self._sensorThreshold and rightVal < self._sensorThreshold:
             return PositionEnum.CLOSED
-
-    def eyePositionMode(self, duration):
-        samples = []
-        startTime = time.time()
-        while time.time() - startTime < duration:
-            leftVal = self._readInfra(self._pinL)
-            rightVal = self._readInfra(self._pinR)
-            
-            # Core Logic
-            # print(f'LOG: Left {leftVal}')
-            # print(f'LOG: Right {rightVal}')
-            if leftVal < self._sensorThreshold and rightVal > self._sensorThreshold:
-                samples.append(PositionEnum.LEFT)
-            elif leftVal > self._sensorThreshold and rightVal < self._sensorThreshold:
-                samples.append(PositionEnum.RIGHT)
-            elif leftVal > self._sensorThreshold and rightVal > self._sensorThreshold:
-                samples.append(PositionEnum.CENTER)
-            elif leftVal < self._sensorThreshold and rightVal < self._sensorThreshold:
-                samples.append(PositionEnum.CLOSED)
-        
-        return statistics.mode(samples)
