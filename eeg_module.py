@@ -32,7 +32,7 @@ class EEGModule:
         model = joblib.load(modelPath)
         return model
 
-    def modelPrediction(self, model, streams, n=10) -> bool:
+    def modelPrediction(self, model, streams, n, eegOutput) -> bool:
         try:
             print("Start acquiring data from EEG stream")
             inlet = StreamInlet(streams[0], max_chunklen=50)
@@ -63,9 +63,11 @@ class EEGModule:
 
             # Output
             if yPred[0] == "turn_on":
-                return CommandEnum.TURN_ON
+                eegOutput = CommandEnum.TURN_ON
+                return
             else:
-                return CommandEnum.TURN_OFF
+                eegOutput = CommandEnum.TURN_OFF
+                return
 
         except Exception as e:
             print(e)

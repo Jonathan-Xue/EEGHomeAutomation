@@ -49,7 +49,7 @@ class EyeTrackingModule:
         elif leftVal < self._sensorThreshold and rightVal < self._sensorThreshold:
             return EyeEnum.CLOSED
 
-    def eyePositionMode(self, duration):
+    def eyePositionMode(self, duration, eyeOutput):
         startTime = time.time()
         samples = []
         while time.time() - startTime < duration:
@@ -71,4 +71,5 @@ class EyeTrackingModule:
                 print("LOG: Closed")
                 samples.append(EyeEnum.CLOSED)
         
-        return statistics.mode(samples)
+        eyeOutput = statistics.mode(samples)
+        return

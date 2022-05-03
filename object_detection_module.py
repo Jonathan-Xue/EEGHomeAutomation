@@ -27,7 +27,7 @@ class ObjectDetectionModule:
         pass
 
 
-    def objectDetection(model: str, camera_id: int, width: int, height: int, num_threads: int, enable_edgetpu: bool, duration: float) -> None:
+    def objectDetection(model: str, camera_id: int, width: int, height: int, num_threads: int, enable_edgetpu: bool, duration: float, objectOutput) -> None:
         """Continuously run inference on images acquired from the camera.
         Args:
         model: Name of the TFLite object detection model.
@@ -75,9 +75,10 @@ class ObjectDetectionModule:
                 else:
                     objects['right'].append(new_obj)
             if objects != {'left': [], 'center': [], 'right': []}:
+                objectOutput = objects
                 cap.release()
                 cv2.destroyAllWindows()
-                return objects
+                return
 
         cap.release()
         cv2.destroyAllWindows()
