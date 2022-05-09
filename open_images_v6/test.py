@@ -6,7 +6,7 @@ from PIL import Image
 
 # Constants
 DETECTION_THRESHOLD = 0.3
-JPG_FILE = './image.jpg'
+JPG_FILE = './input.jpg'
 
 # Helpers
 def preprocess_image(image_path, input_size):
