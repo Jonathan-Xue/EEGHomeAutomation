@@ -10,6 +10,8 @@ from eeg_module import CommandEnum, EEGModule
 
 # Constants
 DURATION = 10
+IP = 'http://127.0.0.1'
+PORT = 5000
 
 # Main
 def main():
@@ -38,7 +40,7 @@ def main():
                     print(f'{command.name} {object}')
 
                     # Send Request
-                    # requests.post('http://127.0.0.1:5000/rpi', json={'object': object, 'command': command.name})
+                    requests.post(f'{IP}:{PORT}/rpi', json={'object': object, 'command': command.name})
                     startTime = float('inf')
 
 if __name__ == '__main__':
