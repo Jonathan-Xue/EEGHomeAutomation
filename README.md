@@ -38,7 +38,8 @@ sudo apt-get install libatlast-base-dev
 Attach the 5V, data, and ground pins of the QTR-1RC sensors to the corresponding pins on the Raspberry Pi. The data pins are specified in [main.py](main.py).
 
 ## Training The Models
-- [open_images_v6](open_images_v6/README.md)
+- [EEG][train/eeg/README.md)
+- [Object Detection](train/object_detection/README.md)
 
 ## Execution
 - Turn on the Muse. By default, it will enter pairing mode, as indicated by the strobing white LED. 
